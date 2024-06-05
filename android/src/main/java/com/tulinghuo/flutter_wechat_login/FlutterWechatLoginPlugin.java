@@ -11,6 +11,7 @@ import android.content.IntentFilter;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.os.Build;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
@@ -38,9 +39,7 @@ import io.flutter.plugin.common.MethodChannel.Result;
  */
 public class FlutterWechatLoginPlugin extends BroadcastReceiver implements FlutterPlugin, MethodCallHandler,
         ActivityAware {
-    /// The MethodChannel that will the communication between Flutter and native Android
-    ///
-    /// This local reference serves to register the plugin with the Flutter Engine and unregister it
+
     /// when the Flutter Engine is detached from the Activity
     private MethodChannel channel;
     private Activity activity;
@@ -61,7 +60,7 @@ public class FlutterWechatLoginPlugin extends BroadcastReceiver implements Flutt
 
         private final WeakReference<FlutterWechatLoginPlugin> flutterWechatLoginPluginWeakReference;
 
-        public MyHandler(FlutterWechatLoginPlugin flutterWechatLoginPlugin){
+        public MyHandler(FlutterWechatLoginPlugin flutterWechatLoginPlugin) {
             this.flutterWechatLoginPluginWeakReference = new WeakReference<>(flutterWechatLoginPlugin);
         }
 
@@ -71,100 +70,92 @@ public class FlutterWechatLoginPlugin extends BroadcastReceiver implements Flutt
             switch (tag) {
                 case NetworkUtil.GET_TOKEN: {
                     Result result = flutterWechatLoginPluginWeakReference.get().accessTokenResult;
-                    if (result == null) return;
+                    if (result == null)
+                        return;
                     Bundle data = msg.getData();
                     JSONObject json;
                     try {
                         json = new JSONObject(data.getString("result"));
                         result.success(json.toString());
-                    }
-                    catch (JSONException e) {
+                    } catch (JSONException e) {
                         json = new JSONObject();
                         try {
                             json.put("ret", -1);
-                        }
-                        catch (JSONException ex) {
+                        } catch (JSONException ex) {
                             ex.printStackTrace();
                         }
                         Log.e(TAG, e.getMessage());
                         result.success(json.toString());
-                    }
-                    finally {
+                    } finally {
                         flutterWechatLoginPluginWeakReference.get().accessTokenResult = null;
                     }
                     break;
                 }
                 case NetworkUtil.REFRESH_TOKEN: {
                     Result result = flutterWechatLoginPluginWeakReference.get().refreshTokenResult;
-                    if (result == null) return;
+                    if (result == null)
+                        return;
                     Bundle data = msg.getData();
                     JSONObject json;
                     try {
                         json = new JSONObject(data.getString("result"));
                         result.success(json.toString());
-                    }
-                    catch (JSONException e) {
+                    } catch (JSONException e) {
                         json = new JSONObject();
                         try {
                             json.put("ret", -1);
-                        }
-                        catch (JSONException ex) {
+                        } catch (JSONException ex) {
                             ex.printStackTrace();
                         }
                         Log.e(TAG, e.getMessage());
                         result.success(json.toString());
-                    }
-                    finally {
+                    } finally {
                         flutterWechatLoginPluginWeakReference.get().refreshTokenResult = null;
                     }
                     break;
                 }
                 case NetworkUtil.CHECK_TOKEN: {
                     Result result = flutterWechatLoginPluginWeakReference.get().checkTokenResult;
-                    if (result == null) return;
+                    if (result == null)
+                        return;
                     Bundle data = msg.getData();
                     JSONObject json;
                     try {
                         json = new JSONObject(data.getString("result"));
                         result.success(json.toString());
-                    }
-                    catch (JSONException e) {
+                    } catch (JSONException e) {
                         json = new JSONObject();
                         try {
                             json.put("ret", -1);
-                        }
-                        catch (JSONException ex) {
+                        } catch (JSONException ex) {
                             ex.printStackTrace();
                         }
                         Log.e(TAG, e.getMessage());
                         result.success(json.toString());
-                    }
-                    finally {
+                    } finally {
                         flutterWechatLoginPluginWeakReference.get().checkTokenResult = null;
                     }
                     break;
                 }
                 case NetworkUtil.GET_INFO: {
                     Result result = flutterWechatLoginPluginWeakReference.get().userInfoResult;
-                    if (result == null) return;
+                    if (result == null)
+                        return;
                     Bundle data = msg.getData();
                     JSONObject json;
                     try {
                         json = new JSONObject(data.getString("result"));
                         result.success(json.toString());
-                    }
-                    catch (JSONException e) {
+                    } catch (JSONException e) {
                         json = new JSONObject();
                         try {
                             json.put("ret", -1);
-                        }
-                        catch (JSONException ex) {
+                        } catch (JSONException ex) {
                             ex.printStackTrace();
                         }
                         Log.e(TAG, e.getMessage());
                         result.success(json.toString());
-                    }
-                    finally {
+                    } finally {
                         flutterWechatLoginPluginWeakReference.get().userInfoResult = null;
                     }
                     break;
@@ -178,62 +169,65 @@ public class FlutterWechatLoginPlugin extends BroadcastReceiver implements Flutt
         channel = new MethodChannel(flutterPluginBinding.getBinaryMessenger(), "flutter_wechat_login");
         channel.setMethodCallHandler(this);
         context = flutterPluginBinding.getApplicationContext();
-        IntentFilter intentFilter = new IntentFilter("flutter_wechat_login"); 
-        flutterPluginBinding.getApplicationContext().registerReceiver(this, intentFilter,RECEIVER_EXPORTED);
+        IntentFilter intentFilter = new IntentFilter("flutter_wechat_login");
+        if (Build.VERSION.SDK_INT >= 33) {
+            flutterPluginBinding.getApplicationContext().registerReceiver(this, intentFilter,
+                    Context.RECEIVER_EXPORTED);
 
+        } else {
+            flutterPluginBinding.getApplicationContext().registerReceiver(this, intentFilter);
+        }
     }
 
     @Override
     public void onMethodCall(@NonNull MethodCall call, @NonNull Result result) {
         if (call.method.equals("init")) {
-            this.appId = call.argument("appId")
+            this.appId = call.argument("appId");
             this.secret = call.argument("secret");
             Log.i("flutter_wechat_login", "call init -> appId= " + appId);
             regToWx();
             result.success(null);
-        }
-        else if (call.method.equals("isInstalled")) {
+        } else if (call.method.equals("isInstalled")) {
             boolean isInstalled = api.isWXAppInstalled();
             result.success(isInstalled);
-        }
-        else if (call.method.equals("login")) {
+        } else if (call.method.equals("login")) {
             SendAuth.Req req = new SendAuth.Req();
             req.scope = "snsapi_userinfo"; // 只能填 snsapi_userinfo
             req.state = "flutter_wechat_login";
             api.sendReq(req);
             this.loginResult = result;
-        }
-        else if (call.method.equals("getAccessToken")) {
+        } else if (call.method.equals("getAccessToken")) {
             String code = call.argument("code");
             NetworkUtil.sendWxAPI(handler,
-                    String.format("https://api.weixin.qq.com/sns/oauth2/access_token?appid=%s&secret=%s&code=%s&grant_type=authorization_code", this.appId, this.secret, code),
+                    String.format(
+                            "https://api.weixin.qq.com/sns/oauth2/access_token?appid=%s&secret=%s&code=%s&grant_type=authorization_code",
+                            this.appId, this.secret, code),
                     NetworkUtil.GET_TOKEN);
             this.accessTokenResult = result;
-        }
-        else if (call.method.equals("checkToken")) {
+        } else if (call.method.equals("checkToken")) {
             String accessToken = call.argument("accessToken");
             String openid = call.argument("openid");
             NetworkUtil.sendWxAPI(handler,
                     String.format("https://api.weixin.qq.com/sns/auth?access_token=%s&openid=%s", accessToken, openid),
                     NetworkUtil.CHECK_TOKEN);
             this.checkTokenResult = result;
-        }
-        else if (call.method.equals("refreshToken")) {
+        } else if (call.method.equals("refreshToken")) {
             String refreshToken = call.argument("refreshToken");
             NetworkUtil.sendWxAPI(handler,
-                    String.format("https://api.weixin.qq.com/sns/oauth2/refresh_token?appid=%s&grant_type=refresh_token&refresh_token=%s", this.appId, refreshToken),
+                    String.format(
+                            "https://api.weixin.qq.com/sns/oauth2/refresh_token?appid=%s&grant_type=refresh_token&refresh_token=%s",
+                            this.appId, refreshToken),
                     NetworkUtil.REFRESH_TOKEN);
             this.refreshTokenResult = result;
-        }
-        else if (call.method.equals("getUserInfo")) {
+        } else if (call.method.equals("getUserInfo")) {
             String accessToken = call.argument("accessToken");
             String openid = call.argument("openid");
             NetworkUtil.sendWxAPI(handler,
-                    String.format("https://api.weixin.qq.com/sns/userinfo?access_token=%s&openid=%s", accessToken, openid),
+                    String.format("https://api.weixin.qq.com/sns/userinfo?access_token=%s&openid=%s", accessToken,
+                            openid),
                     NetworkUtil.GET_INFO);
             this.userInfoResult = result;
-        }
-        else {
+        } else {
             result.notImplemented();
         }
     }
@@ -251,22 +245,32 @@ public class FlutterWechatLoginPlugin extends BroadcastReceiver implements Flutt
     private void regToWx() {
         // 通过WXAPIFactory工厂，获取IWXAPI的实例
         Log.i("flutter_wechat_login", "通过WXAPIFactory工厂，获取IWXAPI的实例");
-//        api = WXAPIFactory.createWXAPI(this.context, this.appId, true);
-        api = WXAPIFactory.createWXAPI(this.context, null);
+        api = WXAPIFactory.createWXAPI(this.context, this.appId, true);
+        // api = WXAPIFactory.createWXAPI(this.context, null);
         // 将应用的appId注册到微信
         Log.i("flutter_wechat_login", "将应用的appId注册到微信");
         api.registerApp(this.appId);
-        //建议动态监听微信启动广播进行注册到微信
-        new ContextWrapper(context).registerReceiver(new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                // 将该app注册到微信
-                Log.i("flutter_wechat_login", "监听微信启动广播进行注册到微信");
-                api.registerApp(appId);
-            }
-        }, new IntentFilter(ConstantsAPI.ACTION_REFRESH_WXAPP), RECEIVER_EXPORTED);
+        // 建议动态监听微信启动广播进行注册到微信
 
-//        api.handleIntent(activity.getIntent(), this);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            new ContextWrapper(context).registerReceiver(new BroadcastReceiver() {
+                @Override
+                public void onReceive(Context context, Intent intent) {
+                    // 将该app注册到微信
+                    Log.i("flutter_wechat_login", "监听微信启动广播进行注册到微信");
+                    api.registerApp(appId);
+                }
+            }, new IntentFilter(ConstantsAPI.ACTION_REFRESH_WXAPP), Context.RECEIVER_EXPORTED);
+        } else {
+            new ContextWrapper(context).registerReceiver(new BroadcastReceiver() {
+                @Override
+                public void onReceive(Context context, Intent intent) {
+                    // 将该app注册到微信
+                    Log.i("flutter_wechat_login", "监听微信启动广播进行注册到微信");
+                    api.registerApp(appId);
+                }
+            }, new IntentFilter(ConstantsAPI.ACTION_REFRESH_WXAPP));
+        }
     }
 
     @Override
@@ -310,19 +314,16 @@ public class FlutterWechatLoginPlugin extends BroadcastReceiver implements Flutt
                         this.loginResult.success(jsonObject.toString());
                         this.loginResult = null;
                     }
-                }
-                else {
+                } else {
                     this.loginResult.success(jsonObject.toString());
                 }
             }
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
             if (this.loginResult != null) {
                 this.loginResult.success(jsonObject.toString());
             }
-        }
-        finally {
+        } finally {
             this.loginResult = null;
         }
     }
