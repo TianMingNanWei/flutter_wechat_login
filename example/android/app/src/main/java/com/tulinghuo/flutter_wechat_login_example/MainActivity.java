@@ -1,4 +1,4 @@
-package com.tulinghuo.flutter_wechat_login_example;
+package com.kakarot.flutter_wechat_login_example;
 
 import io.flutter.embedding.android.FlutterActivity;
 

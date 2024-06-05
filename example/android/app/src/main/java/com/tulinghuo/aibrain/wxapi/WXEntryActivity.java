@@ -1,4 +1,4 @@
-package com.tulinghuo.aibrain.wxapi;
+package com.kakarot.aibrain.wxapi;
 
 import android.app.Activity;
 import android.content.Intent;

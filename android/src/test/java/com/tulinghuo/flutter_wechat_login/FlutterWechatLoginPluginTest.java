@@ -1,4 +1,4 @@
-package com.tulinghuo.flutter_wechat_login;
+package com.kakarot.flutter_wechat_login;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;

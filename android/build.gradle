@@ -1,4 +1,4 @@
-group 'com.tulinghuo.flutter_wechat_login'
+group 'com.kakarot.flutter_wechat_login'
 version '1.0'
 
 buildscript {

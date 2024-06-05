@@ -27,10 +27,10 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="com.tulinghuo.aibrain.wxapi.WXEntryActivity"
+            android:name="com.kakarot.aibrain.wxapi.WXEntryActivity"
             android:theme="@android:style/Theme.Translucent.NoTitleBar"
             android:exported="true"
-            android:taskAffinity="com.tulinghuo.aibrain"
+            android:taskAffinity="com.kakarot.aibrain"
             android:launchMode="singleTask">
         </activity>
         <!-- Don't delete the meta-data below.
