@@ -1,33 +1,19 @@
 # flutter_wechat_login
 
-[中文请移步此处](./README_CN.md)
-
 Flutter Wechat Login Plugin
 
 |             | Android | iOS |
-|-------------|---------|-----|
+| ----------- | ------- | --- |
 | **Support** | YES     | YES |
-
-<p>
-  <img src="https://github.com/yechong/flutter_wechat_login/blob/main/doc/images/android.gif?raw=true"
-    alt="An animated image of the iOS Wechat Login Plugin UI" height="400"/>
-  &nbsp;&nbsp;&nbsp;&nbsp;
-  <img src="https://github.com/yechong/flutter_wechat_login/blob/main/doc/images/iphone.gif?raw=true"
-   alt="An animated image of the Android Wechat Login Plugin UI" height="400"/>
-</p>
 
 ## Features
 
-This plugin has integrated the function of WeChat login:
-- WeChat app authorized login
-- Exchange code for access_token, refresh_token and authorized scope `/sns/oauth2/access_token`
-- Refresh or renew access_token `/sns/oauth2/refresh_token`
-- Check access_token validity `/sns/auth`
-- Get user info `/sns/userinfo`
+This plugin has integrated the function of WeChat login.
 
 ## Getting Started
 
 Before using this plugin, it is strongly recommended to read the official documentation in detail
+
 - [Android access guide](https://developers.weixin.qq.com/doc/oplatform/Mobile_App/Access_Guide/Android.html)
 - [iOS access guide](https://developers.weixin.qq.com/doc/oplatform/Mobile_App/Access_Guide/iOS.html)
 - [Mobile App WeChat Login Development Guide](https://developers.weixin.qq.com/doc/oplatform/Mobile_App/WeChat_Login/Development_Guide.html)
@@ -49,23 +35,12 @@ bool isInstalled = await flutterWechatLogin.isInstalled();
 // Call up WeChat login, and return code after successful login
 Map<String, dynamic> wechatInfo = await flutterWechatLogin.login();
 
-// Exchange code for access_token, refresh_token and authorized scope
-Map<String, dynamic> accessTokenInfo = await flutterWechatLogin.getAccessToken(code: wechatInfo['code']);
-
-// Refresh or renew access_token
-Map<String, dynamic> refreshTokenInfo = await flutterWechatLogin.refreshToken(refreshToken: accessTokenInfo['refresh_token']);
-
-// Check access_token validity
-Map<String, dynamic> checkTokenInfo = await flutterWechatLogin.checkToken(accessToken: accessTokenInfo['access_token'], openid: accessTokenInfo['openid']);
-
-// Get user information
-Map<String, dynamic> userInfo = await flutterWechatLogin.getUserInfo(accessToken: accessTokenInfo['access_token'], openid: accessTokenInfo['openid']);
-
 ```
 
-
 ### Configure Android version
-- 1)Create a package name `wxapi` under the project `android` directory `/app/src/main/java/packageName`, and then create a new `WXEntryActivity` under this package name, the code is as follows:
+
+- Create a package name `wxapi` under the project `android` directory `/app/src/main/java/packageName`, and then create a new `WXEntryActivity` under this package name, the code is as follows:
+
 ```java
 package packageName.wxapi;
 
@@ -137,114 +112,70 @@ public class WXEntryActivity extends Activity implements IWXAPIEventHandler {
         finish();
     }
 }
-
 ```
 
-- 2)Configure `android/app/src/main/AndroidManifest.xml`
+- Configure `android/app/src/main/AndroidManifest.xml`
+
 >WeChat needs to verify the package name, so the path of the Activity must be `your package name.wxapi.WXEntryActivity`, where `your package name` must be the package name filled in by the WeChat open platform registration application.
-```
+
+```xml
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
-	<!-- new content start -->
-	<uses-permission android:name="android.permission.INTERNET" />
-	<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-	<!-- new content end -->
-	<application>
-		...
-		<!-- new content start -->
-		<activity
-			android:name="Your package name.wxapi.WXEntryActivity"
-			android:theme="@android:style/Theme.Translucent.NoTitleBar"
-			android:exported="true"
-			android:taskAffinity="Your package name"
-			android:launchMode="singleTask">
-		</activity>
-		<!-- new content end -->
-		...
-	</application>
-	<!-- new content start -->
-	<queries>
-		<package android:name="com.tencent.mm" />
-	</queries>
-	<!-- new content end -->
+ <!-- new content start -->
+ <uses-permission android:name="android.permission.INTERNET" />
+ <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+ <!-- new content end -->
+ <application>
+  ...
+  <!-- new content start -->
+  <activity
+   android:name="Your package name.wxapi.WXEntryActivity"
+   android:theme="@android:style/Theme.Translucent.NoTitleBar"
+   android:exported="true"
+   android:taskAffinity="Your package name"
+   android:launchMode="singleTask">
+  </activity>
+  <!-- new content end -->
+  ...
+ </application>
+ <!-- new content start -->
+ <queries>
+  <package android:name="com.tencent.mm" />
+ </queries>
+ <!-- new content end -->
 </manifest>
 ```
-
 
 ### Configure iOS version
 
 Configure `URL Types`
+
 - Use `xcode` to open your iOS project `Runner.xcworkspace`
 - In the `info` configuration tab under `URL Types`, add a new entry
-    - `identifier` fills in `weixin`
-    - `URL Schemes` fills in `Your APPID`
-    - As shown below:
+  - `identifier` fills in `weixin`
+  - `URL Schemes` fills in `Your APPID`
+  - As shown below:
       ![xcode configuration example](https://raw.githubusercontent.com/yechong/flutter_wechat_login/main/doc/images/ios_screenshot_01.png)
 
 Configure `LSApplicationQueriesSchemes`
+
 - Method 1, configure `info` in `xcode`
-    - Open `info` configuration, add a `LSApplicationQueriesSchemes`, namely `Queried URL Schemes`
-    - Add these items:
-        - weixin
-        - weixinULAPI
-        - weixinURLParamsAPI
-    - As shown below：
+  - Open `info` configuration, add a `LSApplicationQueriesSchemes`, namely `Queried URL Schemes`
+  - Add these items:
+    - weixin
+    - weixinULAPI
+    - weixinURLParamsAPI
+  - As shown below：
       ![xcode configuration example](https://raw.githubusercontent.com/yechong/flutter_wechat_login/main/doc/images/ios_screenshot_02.png)
 
 - Method 2, modify `Info.plist` directly
-    - Use `Android Studio` to open `ios/Runner/Info.plist` under the project project
-    - Add the following configuration under the `dict` node (refer to the configuration format in the file):
-```
+  - Use `Android Studio` to open `ios/Runner/Info.plist` under the project project
+  - Add the following configuration under the `dict` node (refer to the configuration format in the file):
+
+```xml
 <key>LSApplicationQueriesSchemes</key>
 <array>
-	<string>weixin</string>
-	<string>weixinULAPI</string>
-	<string>weixinURLParamsAPI</string>
+ <string>weixin</string>
+ <string>weixinULAPI</string>
+ <string>weixinURLParamsAPI</string>
 </array>
-```
-
-
-## Donate
-Buy the writer a cup of coffee
-<p>
-  <img src="https://github.com/yechong/flutter_wechat_login/blob/main/doc/images/wechat_qrcode.jpg?raw=true"
-    alt="WeChat payment QR code" height="400"/>
-  &nbsp;&nbsp;&nbsp;&nbsp;
-  <img src="https://github.com/yechong/flutter_wechat_login/blob/main/doc/images/alipay_qrcode.jpg?raw=true"
-   alt="Alipay collection QR code" height="400"/>
-</p>
-
-
-## LICENSE
-
-```Copyright 2018 OpenFlutter Project
-
-BSD 3-Clause License
-
-Copyright 2017 German Saprykin
-All rights reserved.
-
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions are met:
-
-* Redistributions of source code must retain the above copyright notice, this
-  list of conditions and the following disclaimer.
-
-* Redistributions in binary form must reproduce the above copyright notice,
-  this list of conditions and the following disclaimer in the documentation
-  and/or other materials provided with the distribution.
-
-* Neither the name of the copyright holder nor the names of its
-  contributors may be used to endorse or promote products derived from
-  this software without specific prior written permission.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
-AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
-FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
-DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
-SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
-OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ```
