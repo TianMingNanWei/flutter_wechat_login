@@ -178,16 +178,15 @@ public class FlutterWechatLoginPlugin extends BroadcastReceiver implements Flutt
         channel = new MethodChannel(flutterPluginBinding.getBinaryMessenger(), "flutter_wechat_login");
         channel.setMethodCallHandler(this);
         context = flutterPluginBinding.getApplicationContext();
-        // 注册广播接收器
-        IntentFilter intentFilter = new IntentFilter("flutter_wechat_login"); // 替换为你的广播Action
-        flutterPluginBinding.getApplicationContext().registerReceiver(this, intentFilter);
-        handler = new MyHandler(this);
+        IntentFilter intentFilter = new IntentFilter("flutter_wechat_login"); 
+        flutterPluginBinding.getApplicationContext().registerReceiver(this, intentFilter,RECEIVER_EXPORTED);
+
     }
 
     @Override
     public void onMethodCall(@NonNull MethodCall call, @NonNull Result result) {
         if (call.method.equals("init")) {
-            this.appId = call.argument("appId");
+            this.appId = call.argument("appId")
             this.secret = call.argument("secret");
             Log.i("flutter_wechat_login", "call init -> appId= " + appId);
             regToWx();
@@ -265,7 +264,7 @@ public class FlutterWechatLoginPlugin extends BroadcastReceiver implements Flutt
                 Log.i("flutter_wechat_login", "监听微信启动广播进行注册到微信");
                 api.registerApp(appId);
             }
-        }, new IntentFilter(ConstantsAPI.ACTION_REFRESH_WXAPP));
+        }, new IntentFilter(ConstantsAPI.ACTION_REFRESH_WXAPP), RECEIVER_EXPORTED);
 
 //        api.handleIntent(activity.getIntent(), this);
     }
